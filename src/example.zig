@@ -6,31 +6,26 @@ const ansi = @import("ansi.zig").ansi;
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
 
-    // --- test 1 ---
-    try stdout.print("--- test 1 ---\n", .{});
+    // Fully clear the screen *and* scrollback, then move to top-left.
+    try stdout.writeAll("\x1B[3J\x1B[H\x1B[2J");
 
-    // Print "Line 1\n".
-    try stdout.print("Line 1\n", .{});
+    // Now the terminal is truly fresh at row=0 col=0
+    try stdout.print("Welcome to the ANSI demo!\n", .{});
+    std.time.sleep(1_000_000_000); // Wait 1 second
 
-    // Print "Line 2", then erase the line and move cursor left, then print "Line 3\n".
-    try stdout.print("Line 2", .{});
-    try ansi.erase.line(stdout);
-    try ansi.cursor.left(stdout);
-    try stdout.print("Line 3\n", .{});
-
-    // --- test 2 ---
-    try stdout.print("--- test 2 ---\n", .{});
-
-    // Print four lines: "Line 1\n", "Line 2\n", "Line 3\n", "Line 4\n".
-    try stdout.print("Line 1\n", .{});
-    try stdout.print("Line 2\n", .{});
-    try stdout.print("Line 3\n", .{});
-    try stdout.print("Line 4\n", .{});
-
-    // Move the cursor up two lines, insert "third \n",
-    // then move down two lines and print "last \n".
-    try ansi.cursor.prev_line(stdout, 2);
-    try stdout.print("third \n", .{});
+    // Save position, move down, overwrite, etc...
+    try ansi.cursor.save(stdout);
     try ansi.cursor.down(stdout, 2);
-    try stdout.print("last \n", .{});
+    try ansi.erase.line(stdout);
+    try stdout.print("We moved down 2 lines.\n", .{});
+    std.time.sleep(1_000_000_000);
+
+    // Restore cursor and overwrite message
+    try ansi.cursor.restore(stdout);
+    try ansi.erase.line(stdout);
+    try stdout.print("Overwriting the welcome message.\n", .{});
+    std.time.sleep(1_000_000_000);
+
+    // Finally, say goodbye
+    try stdout.print("\nGoodbye!\n", .{});
 }
