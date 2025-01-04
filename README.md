@@ -1,6 +1,14 @@
-# ansi-escape.zig
+<h1 align="center">
+   <img src="ansi-escape.png" width="40%" height="40%" alt="ansi-escape.zig logo" title="ansi-escape.zig logo">
+</h1>
 
-A minimalistic Zig library for working with ANSI escape sequences. This library provides utilities for cursor control, screen manipulation, and terminal resetting through a simple and efficient API.
+<div align="center">A minimalistic Zig library for working with ANSI escape sequences. This library provides utilities for cursor control, screen manipulation, and terminal resetting through a simple and efficient API.<br></br></div>
+<div align="center">
+   
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/LICENSE)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/hendriknielaender/ansi-escape.zig)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/CONTRIBUTING.md)
+</div>
 
 ## Features
 
@@ -12,7 +20,7 @@ A minimalistic Zig library for working with ANSI escape sequences. This library 
 ## Installation
 
 Run the following command to fetch the ansi-escape.zig package:
-```shell
+```bash
 zig fetch https://github.com/hendriknielaender/ansi-escape.zig/archive/<COMMIT>.tar.gz --save
 ```
 
