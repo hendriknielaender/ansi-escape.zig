@@ -11,6 +11,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/ansi.zig"),
         .target = target,
         .optimize = optimize,
+        .version = version,
     });
     b.installArtifact(lib);
 
