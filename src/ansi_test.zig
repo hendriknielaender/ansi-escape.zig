@@ -81,7 +81,7 @@ test "Cursor" {
     {
         var stream = io.fixedBufferStream(slice);
         try ansi.cursor.next_line(&stream.writer(), 2);
-        try std.testing.expectEqualStrings("\x1B[E\x1B[E", stream.writer().context.getWritten());
+        try std.testing.expectEqualStrings("\x1B[2E", stream.writer().context.getWritten());
         stream.reset();
     }
 
@@ -91,7 +91,7 @@ test "Cursor" {
     {
         var stream = io.fixedBufferStream(slice);
         try ansi.cursor.prev_line(&stream.writer(), 1);
-        try std.testing.expectEqualStrings("\x1B[F", stream.writer().context.getWritten());
+        try std.testing.expectEqualStrings("\x1B[1F", stream.writer().context.getWritten());
         stream.reset();
     }
 
@@ -186,12 +186,12 @@ test "Erase" {
     const slice = backing_array[0..];
 
     //
-    // 1) erase.screen => "\x1B[2J"
+    // 1) erase.screen => "\x1B[2J\x1B[3J"
     //
     {
         var stream = io.fixedBufferStream(slice);
         try ansi.erase.screen(&stream.writer());
-        try std.testing.expectEqualStrings("\x1B[2J", stream.writer().context.getWritten());
+        try std.testing.expectEqualStrings("\x1B[2J\x1B[3J", stream.writer().context.getWritten());
         stream.reset();
     }
 
