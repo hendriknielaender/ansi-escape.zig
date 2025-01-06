@@ -1,31 +1,35 @@
 const std = @import("std");
 const ansi = @import("ansi.zig").ansi;
 
-/// This program demonstrates how to write lines of text,
-/// overwrite them with ANSI cursor operations
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
 
-    // Fully clear the screen *and* scrollback, then move to top-left.
-    try stdout.writeAll("\x1B[3J\x1B[H\x1B[2J");
-
-    // Now the terminal is truly fresh at row=0 col=0
-    try stdout.print("Welcome to the ANSI demo!\n", .{});
-    std.time.sleep(1_000_000_000); // Wait 1 second
-
-    // Save position, move down, overwrite, etc...
+    // 1) Clear screen + scrollback and move cursor to top-left (line1,col1).
+    try ansi.clear.screen(stdout);
+    // 2) Save the current cursor position (line1,col1) to overwrite it later.
     try ansi.cursor.save(stdout);
-    try ansi.cursor.down(stdout, 2);
-    try ansi.erase.line(stdout);
-    try stdout.print("We moved down 2 lines.\n", .{});
+
+    // Print line1, then cursor moves to line2.
+    try stdout.print("Welcome to the ANSI demo!\n", .{});
     std.time.sleep(1_000_000_000);
 
-    // Restore cursor and overwrite message
+    // 3) Move down 1 line from line2 -> line3.
+    try ansi.cursor.down(stdout, 1);
+    // Print line3.
+    try stdout.print("We moved down 2 lines\n", .{});
+    std.time.sleep(1_000_000_000);
+
+    // 4) Restore cursor position => back to line1,col1.
     try ansi.cursor.restore(stdout);
+    // Erase line1’s text.
     try ansi.erase.line(stdout);
+
+    // Overwrite line1 with the new text.
     try stdout.print("Overwriting the welcome message.\n", .{});
     std.time.sleep(1_000_000_000);
 
-    // Finally, say goodbye
-    try stdout.print("\nGoodbye!\n", .{});
+    // 5) Now we’re at line2. Move down 2 lines => line4.
+    try ansi.cursor.down(stdout, 2);
+    // Print line4: "Goodbye!"
+    try stdout.print("Goodbye!\n", .{});
 }

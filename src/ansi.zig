@@ -97,10 +97,7 @@ pub const Cursor = struct {
     /// - `writer`: The output stream to write the escape codes to.
     /// - `count`: Number of lines to move down.
     pub fn next_line(writer: anytype, count: u32) !void {
-        var i: u32 = 0;
-        while (i < count) : (i += 1) {
-            try writer.writeAll("\x1B[E");
-        }
+        try writer.print("{s}{d}E", .{ CSI, count });
     }
 
     /// Moves the cursor up to the previous line (column 0) a specified number of times.
@@ -108,10 +105,7 @@ pub const Cursor = struct {
     /// - `writer`: The output stream to write the escape codes to.
     /// - `count`: Number of lines to move up.
     pub fn prev_line(writer: anytype, count: u32) !void {
-        var i: u32 = 0;
-        while (i < count) : (i += 1) {
-            try writer.writeAll("\x1B[F");
-        }
+        try writer.print("{s}{d}F", .{ CSI, count });
     }
 
     /// Moves the cursor to column 0 (leftmost position) of the current line.
@@ -181,8 +175,8 @@ pub const Erase = struct {
     ///
     /// - `writer`: The output stream to write the escape codes to.
     pub fn screen(writer: anytype) !void {
-        // Clear screen: CSI 2J
-        try writer.writeAll("\x1B[2J");
+        // Clear screen + scrollback.
+        try writer.writeAll("\x1B[2J\x1B[3J");
     }
 
     /// Erases everything above the cursor (inclusive) a specified number of times.
