@@ -1,7 +1,7 @@
-/// `ansi-escape.zig` - A Zig library for generating ANSI escape codes.
-///
-/// This library provides functions to control cursor movement, screen manipulation,
-/// and text formatting in terminal applications.
+//! `ansi-escape.zig` - A Zig library for generating ANSI escape codes.
+//!
+//! This library provides functions to control cursor movement, screen manipulation,
+//! and text formatting in terminal applications.
 const std = @import("std");
 
 /// The escape character used in ANSI codes.
