@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const version = std.SemanticVersion{ .major = 0, .minor = 1, .patch = 0 };
+const version = std.SemanticVersion{ .major = 0, .minor = 2, .patch = 1 };
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
