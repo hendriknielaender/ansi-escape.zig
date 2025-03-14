@@ -1,6 +1,6 @@
 .{
     .name = .ansi_escape,
-    .version = "0.0.1",
+    .version = "0.2.0",
     .fingerprint = 0x72ce002427f5f668,
     .dependencies = .{},
     .paths = .{
