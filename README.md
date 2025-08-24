@@ -6,6 +6,7 @@
 <div align="center">
    
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/LICENSE)
+![Zig Version](https://img.shields.io/badge/zig-0.15.1-orange.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/hendriknielaender/ansi-escape.zig)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/CONTRIBUTING.md)
 </div>
@@ -39,12 +40,14 @@
 
        const exe = b.addExecutable(.{
            .name = "test",
-           .root_source_file = b.path("src/main.zig"),
-           .target = target,
-           .optimize = optimize,
+           .root_module = b.createModule(.{
+               .root_source_file = b.path("src/main.zig"),
+   +           .imports = &.{
+   +               .{ .name = "ansi-escape", .module = ansi_module },
+   +           },
+           }),
        });
-   +   exe.root_module.addImport("ansi-escape", ansi_module);
-       exe.install();
+       b.installArtifact(exe);
        ...
    }
    ```
@@ -56,23 +59,114 @@ const std = @import("std");
 const ansi = @import("ansi-escape").ansi;
 
 pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
+    // Use buffered writer for better performance (required in Zig 0.15.1+)
+    var stdout_buffer: [1024]u8 = undefined;
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    const stdout = &stdout_writer.interface;
 
     // Print initial lines
     try stdout.print("Line 1\nLine 2\nLine 3\n", .{});
+    try stdout.flush(); // Don't forget to flush!
 
     // Move up one line, clear it, and replace it
     try ansi.cursor.up(stdout, 1);
     try ansi.erase.line(stdout);
     try stdout.print("Updated Line 2\n", .{});
+    try stdout.flush();
 
     // Hide cursor, wait for user, and then restore
     try ansi.cursor.hide(stdout);
-    try std.time.sleep(1_000_000_000); // 1 second
+    try stdout.flush();
+    std.Thread.sleep(1_000_000_000); // 1 second
     try ansi.cursor.show(stdout);
+    try stdout.flush();
 }
 ```
 
-## API
+## API Reference
 
-The `ansi-escape.zig` library offers a structured API organized into several key components: `Cursor`, `Scroll`, `Erase`, and `Clear`. Each component provides a set of functions to perform specific terminal manipulations. The `Cursor` struct allows precise control over cursor positioning and movement, including absolute and relative movements, hiding/showing the cursor, and saving/restoring cursor positions. The `Scroll` struct enables scrolling the terminal content up or down by a specified number of lines. The `Erase` struct provides functions to clear parts of the screen or lines, such as erasing the entire screen, clearing lines, or removing content above or below the cursor. Finally, the `Clear` struct includes functions to reset the terminal to its default state. Together, these components offer a flexible and powerful API for managing terminal behavior through ANSI escape codes.
+The `ansi-escape.zig` library is organized into four main components, accessible through `ansi.*`:
+
+### 🎯 Cursor Control (`ansi.cursor`)
+
+Control cursor position and visibility:
+
+```zig
+// Position cursor at specific coordinates (0-based)
+try ansi.cursor.to(writer, column, row);       // Move to specific position
+try ansi.cursor.to(writer, column, null);      // Move to column on current row
+
+// Relative movement
+try ansi.cursor.up(writer, count);             // Move up N lines
+try ansi.cursor.down(writer, count);           // Move down N lines
+try ansi.cursor.forward(writer, count);        // Move right N columns
+try ansi.cursor.backward(writer, count);       // Move left N columns
+try ansi.cursor.move(writer, x, y);            // Move relative (+ right/down, - left/up)
+
+// Line navigation
+try ansi.cursor.next_line(writer, count);      // Move to beginning of next line(s)
+try ansi.cursor.prev_line(writer, count);      // Move to beginning of previous line(s)
+try ansi.cursor.left(writer);                  // Move to leftmost column
+
+// Visibility and state
+try ansi.cursor.hide(writer);                  // Hide cursor
+try ansi.cursor.show(writer);                  // Show cursor
+try ansi.cursor.save(writer);                  // Save current position
+try ansi.cursor.restore(writer);               // Restore saved position
+```
+
+### 📜 Scrolling (`ansi.scroll`)
+
+Scroll terminal content:
+
+```zig
+try ansi.scroll.up(writer, count);             // Scroll content up N lines
+try ansi.scroll.down(writer, count);           // Scroll content down N lines
+```
+
+### 🧹 Erasing (`ansi.erase`)
+
+Clear parts of the screen or lines:
+
+```zig
+// Screen operations
+try ansi.erase.screen(writer);                 // Clear entire screen + scrollback
+
+// Directional clearing
+try ansi.erase.up(writer, count);              // Clear above cursor N times
+try ansi.erase.down(writer, count);            // Clear below cursor N times
+
+// Line operations
+try ansi.erase.line(writer);                   // Clear entire current line
+try ansi.erase.line_start(writer);             // Clear from cursor to line start
+try ansi.erase.line_end(writer);               // Clear from cursor to line end
+try ansi.erase.lines(writer, count);           // Clear N lines above cursor
+```
+
+### 🔄 Reset (`ansi.clear`)
+
+Reset terminal to default state:
+
+```zig
+try ansi.clear.screen(writer);                 // Full terminal reset (RIS)
+```
+
+### Usage Pattern
+
+All functions accept any writer that implements the standard Zig writer interface:
+
+```zig
+const std = @import("std");
+const ansi = @import("ansi-escape").ansi;
+
+pub fn main() !void {
+    var stdout_buffer: [1024]u8 = undefined;
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    const writer = &stdout_writer.interface;
+
+    // Use any ansi function with the writer
+    try ansi.cursor.to(writer, 10, 5);
+    try ansi.erase.line(writer);
+    try writer.flush(); // Remember to flush!
+}
+```
