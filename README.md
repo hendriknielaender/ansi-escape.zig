@@ -6,7 +6,7 @@
 <div align="center">
    
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/LICENSE)
-![Zig Version](https://img.shields.io/badge/zig-0.15.1-orange.svg)
+![Zig Version](https://img.shields.io/badge/zig-0.16.0-orange.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/hendriknielaender/ansi-escape.zig)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hendriknielaender/ansi-escape.zig/blob/HEAD/CONTRIBUTING.md)
 </div>
