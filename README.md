@@ -58,28 +58,29 @@
 const std = @import("std");
 const ansi = @import("ansi-escape").ansi;
 
-pub fn main() !void {
-    // Use buffered writer for better performance (required in Zig 0.15.1+)
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
+pub fn main(init: std.process.Init) !void {
+    const io = init.io;
+
+    var buf: [1024]u8 = undefined;
+    var file_writer = std.Io.File.stdout().writer(io, &buf);
+    const stdout: *std.Io.Writer = &file_writer.interface;
 
     // Print initial lines
     try stdout.print("Line 1\nLine 2\nLine 3\n", .{});
-    try stdout.flush(); // Don't forget to flush!
+    try file_writer.flush();
 
     // Move up one line, clear it, and replace it
     try ansi.cursor.up(stdout, 1);
     try ansi.erase.line(stdout);
     try stdout.print("Updated Line 2\n", .{});
-    try stdout.flush();
+    try file_writer.flush();
 
-    // Hide cursor, wait for user, and then restore
+    // Hide cursor, wait, and then restore
     try ansi.cursor.hide(stdout);
-    try stdout.flush();
-    std.Thread.sleep(1_000_000_000); // 1 second
+    try file_writer.flush();
+    try io.sleep(std.Io.Duration.fromSeconds(1), .awake);
     try ansi.cursor.show(stdout);
-    try stdout.flush();
+    try file_writer.flush();
 }
 ```
 
@@ -159,14 +160,16 @@ All functions accept any writer that implements the standard Zig writer interfac
 const std = @import("std");
 const ansi = @import("ansi-escape").ansi;
 
-pub fn main() !void {
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const writer = &stdout_writer.interface;
+pub fn main(init: std.process.Init) !void {
+    const io = init.io;
+
+    var buf: [1024]u8 = undefined;
+    var file_writer = std.Io.File.stdout().writer(io, &buf);
+    const writer: *std.Io.Writer = &file_writer.interface;
 
     // Use any ansi function with the writer
     try ansi.cursor.to(writer, 10, 5);
     try ansi.erase.line(writer);
-    try writer.flush(); // Remember to flush!
+    try file_writer.flush();
 }
 ```
