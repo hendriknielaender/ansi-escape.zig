@@ -1,6 +1,7 @@
 .{
     .name = .ansi_escape,
     .version = "0.4.0",
+    .minimum_zig_version = "0.16.0",
     .fingerprint = 0x72ce002427f5f668,
     .dependencies = .{},
     .paths = .{
