@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'  # Triggers the workflow on push events to tags matching v*, e.g., v1.0, v20.15.10
+  # Allows re-running the docs deploy without cutting a new tag.
+  workflow_dispatch:
 
 jobs:
   build:
